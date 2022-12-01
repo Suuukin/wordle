@@ -11,17 +11,78 @@ class State:
     buttons = {} # {key_text, button}
     wordle = random.choice(wordlist.wordle_list)
     keyboard_frames = {}
+    current_row = 1
+    current_column = 1
+    word = None
+    game_won = False
 
 print(State.wordle)
 
 def label_maker(frame):
+    """Function to creates the labels in the 5*6 grid."""
     return tk.Label(frame, text="x", font=GRID_FONT, borderwidth=3, padx=20, pady=10)
 
 def btn_maker(frame, text):
-    return tk.Button(frame, text=text, font=KEYBOARD_FONT, operation=btn_op(text))
+    """Function to create the buttons for the keyboard."""
+    return tk.Button(frame, text=text, font=KEYBOARD_FONT, command=lambda: btn_op(text))
+
+def position_check(wordle,letter):
+    positions = []  # list to store positions for each 'char' in 'wordle'
+    for location in range(len(wordle)):
+        if wordle[location] is letter:
+            positions.append(location + 1)
+    return positions
+
+def letter_check(letter):
+    if letter in State.wordle:
+        position_check()
+        
+
+def submit_word():
+    """When you press Enter checks your word and tells you what letters are in the wordle."""
+    if State.word is State.wordle:
+        State.game_won = True
+    if State.word in wordlist.wordle_list:
+        State.current_row += 1
+        for letter in list(State.word):
+            letter_check(letter)
+
+def clear_line():
+    """Resets all the labels in the row."""
+    return
+
+#def row_selector():
+#    """Moves to the next row after a guess is successfully submitted."""
+#    return
+#
+#def column_selector():
+#    """Selects which slot in the row the letter clicked should go."""
+#    return
+
+def update_label(row, column, text):
+    """Updates the label on the grid with the key pressed."""
+    label = State.labels[(row, column)]
+    label.configure(text=text)
+    State.word = State.word+text
+    return
+
+def update_square(text):
+    """Finds the right slot in the grid and then updates label."""
+    #row = row_selector()
+    #column = column_selector()
+    update_label(State.current_row, State.current_column, text)
+    State.current_row += 1
+    print(State.current_row)
 
 def btn_op(text):
-    return
+    """Checks if it's a special button or to just run the default for keyboard."""
+    if text == "ENTER":
+        submit_word()
+    elif text == "CE":
+        clear_line()
+    else:
+        update_square(text)
+
 
 KEY_ROWS = [
     "qwertyuiop",
