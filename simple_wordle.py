@@ -8,24 +8,29 @@ class State:
     wordle = random.choice(wordlist.wordle_list)
     letters = list(wordle)
     ask_end_game = True
-    guess_words = input("Do you want to enter full words as guesses (y,n)? ")
-    position_hints = input("Do you want positional hints (y, n, detailed, colors)? ")
+    guess_words = None
+    position_hints = None
+    invalid_guess = False
+    wordle_list = set(wordlist.wordle_list)
 
+
+State.guess_words = input("Do you want to enter full words as guesses (y,n)? ")
+State.position_hints = input("Do you want positional hints (y, n, detailed, colors)? ")
+ 
 print(State.wordle)
-
 
 
 def detailed_position_check(guess_letter):
     """Checks for what positions the letter is in the wordle.
     Then returns all the positions that the letter is in."""
     positions = []  # list to store positions for each 'char' in 'wordle'
-    for location in range(len(State.letters)):
-        if State.letters[location] == guess_letter:
-            positions.append(location + 1)
+    for i, location in enumerate(State.letters):
+        if State.letters[i] == guess_letter:
+            positions.append(i + 1)
     return positions
 
 
-def position_check(letter, guess_word=None):
+def position_check(letter, guess_word=None, i=None):
     """Selects which hint and positional clues the simple_wordle should return."""
     if State.position_hints == "colors":
         if letter not in State.letters: 
@@ -34,14 +39,9 @@ def position_check(letter, guess_word=None):
         else:
             # sets the color to yellow if in the word
             color = "Yellow"
-        letter_locations = list(guess_word)
         positions = detailed_position_check(letter)
-        for position in positions:
-            # checks if the letter in the guessed word is in any of the right positions
-            if State.letters[position-1] is letter_locations[position-1]:
-                # if the letter is in the right place overwrites yellow to green
-                color = "Green"
-                
+        if State.wordle[i] == letter:
+            color = "Green"
         print(f"{letter} is {color}.")
         return
 
@@ -61,19 +61,28 @@ def position_check(letter, guess_word=None):
         print(f"The letter {letter} is not in the wordle.")
 
 
+def word_in_wordle_list():
+    if guess_word not in wordlist.wordle_list:
+        State.invalid_guess = True
+        print("Your guessed word is not in the wordle list.")
+    else:
+        State.invalid_guess = False
+    
 
 while True:
     """Loop that runs the game until the wordle is guessed."""
     if State.guess_words == "y":
         guess_word = input("Guess a five letter word. ")
-        if guess_word == State.wordle:
-            # ends loop if guessed word is correct
-            print("You guessed the Wordle!")
-            break
-        else:
-            for letter in list(guess_word):
-                # checks all the letters and returns the correct positional hints
-                position_check(letter, guess_word)
+        word_in_wordle_list()
+        if not State.invalid_guess:
+            if guess_word == State.wordle:
+                # ends loop if guessed word is correct
+                print("You guessed the Wordle!")
+                break
+            else:
+                for i, letter in enumerate(guess_word):
+                    # checks all the letters and returns the correct positional hints
+                    position_check(letter, guess_word, i)
 
     else:
         guess_letter = input("Guess a letter in the wordle. ")

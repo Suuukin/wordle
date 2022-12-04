@@ -13,7 +13,7 @@ class State:
     keyboard_frames = {}
     current_row = 1
     current_column = 1
-    word = None
+    word = ""
     game_won = False
 
 print(State.wordle)
