@@ -57,7 +57,7 @@ def position_check(guess_letter):
             positions.append(i + 1)
     return positions
 
- 
+
 def letter_check(wordle, letter, i):
     if letter not in State.letters:
         color = "grey"
@@ -78,11 +78,19 @@ def clear_line():
     State.guess = ""
 
 
+def back_space():
+    label = State.labels[(State.current_x - 1, State.current_y)]
+    update_label(label, text=" ")
+    State.current_x -= 1
+    State.guess = State.guess[:-1]
+    print(State.guess)
+
+
 def submit_word():
     """When you press Enter checks your word and tells you what letters are in the wordle."""
     if State.guess == State.wordle:
         State.game_over = True
-        
+
     if State.guess in wordlist.wordle_list:
         for i, letter in enumerate(State.guess):
             color = letter_check(State.wordle, letter, i)
@@ -91,12 +99,10 @@ def submit_word():
             button = State.buttons[letter]
             update_keyboard(button, color=color)
         State.current_y += 1
-        print(State.current_y)
         State.current_x = 1
         State.guess = ""
     else:
         clear_line()
-
 
 
 def update_letter(x, y, text):
@@ -114,16 +120,30 @@ def update_square(text):
     print(State.current_x)
 
 
-def btn_op(text):
+def btn_op(text, event=None):
     """Checks if it's a special button or to just run the default for keyboard."""
     if not State.game_over:
-        if State.current_y <= 7:
+        if State.current_y <= 6:
             if text == "ENTER":
                 submit_word()
             elif text == "CE":
                 clear_line()
+            elif text == "BACKSPACE":
+                back_space()
             else:
-                update_square(text)
+                if State.current_x <= 5:
+                    update_square(text)
+
+
+def button_binder(frame, text):
+    if text == "ENTER":
+        frame.bind("<Return>", lambda event: btn_op(text))
+    elif text == "BACKSPACE":
+        frame.bind("<BackSpace>", lambda event: btn_op(text))
+    elif text == "CE":
+        frame.bind("<Control-BackSpace>", lambda event: btn_op(text))
+    else:
+        frame.bind(str(text), lambda event: btn_op(text))
 
 
 KEY_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"]
@@ -157,12 +177,16 @@ def main():
         keys = list(key_row)
         for column, key_text in enumerate(keys):
             State.buttons[key_text] = button = btn_maker(frame, key_text)
+            button_binder(window, key_text)
             button.grid(row=1, column=column + 1)
 
     enter_btn = btn_maker(State.keyboard_frames[2], "ENTER")
     enter_btn.grid(row=1, column=9)
+    button_binder(window, "ENTER")
     clear_btn = btn_maker(State.keyboard_frames[0], "CE")
     clear_btn.grid(row=1, column=11)
+    button_binder(window, "BACKSPACE")
+    button_binder(window, "CE")
 
     window.mainloop()
 
