@@ -45,7 +45,8 @@ def update_label(label, text=None, color=None):
 
 
 def update_keyboard(button, color=None):
-    button.configure(bg=color)
+    if button["bg"] != "green":
+        button.configure(bg=color)
 
 
 def position_check(guess_letter):
@@ -78,12 +79,12 @@ def clear_line():
     State.guess = ""
 
 
-def back_space():
-    label = State.labels[(State.current_x - 1, State.current_y)]
-    update_label(label, text=" ")
-    State.current_x -= 1
-    State.guess = State.guess[:-1]
-    print(State.guess)
+def backspace():
+    if State.guess != "":
+        label = State.labels[(State.current_x - 1, State.current_y)]
+        update_label(label, text=" ")
+        State.current_x -= 1
+        State.guess = State.guess[:-1]
 
 
 def submit_word():
@@ -117,7 +118,6 @@ def update_square(text):
     """Finds the right slot in the grid and then updates label."""
     update_letter(State.current_x, State.current_y, text)
     State.current_x += 1
-    print(State.current_x)
 
 
 def btn_op(text, event=None):
@@ -129,7 +129,7 @@ def btn_op(text, event=None):
             elif text == "CE":
                 clear_line()
             elif text == "BACKSPACE":
-                back_space()
+                backspace()
             else:
                 if State.current_x <= 5:
                     update_square(text)
